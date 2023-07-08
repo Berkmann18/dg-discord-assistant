@@ -1,10 +1,10 @@
 resource "digitalocean_droplet" "dg_discord_assistant" {
-  image              = "ubuntu-20-04-x64"
-  name               = var.project
-  region             = var.region
-  size               = "s-1vcpu-1gb"
-  backups            = true
-  monitoring         = true
+  image      = "ubuntu-20-04-x64"
+  name       = var.project
+  region     = var.region
+  size       = "s-1vcpu-1gb"
+  backups    = true
+  monitoring = true
   ssh_keys = [
     data.digitalocean_ssh_key.xux7.id
   ]
@@ -27,7 +27,11 @@ resource "digitalocean_droplet" "dg_discord_assistant" {
       "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash",
       "source /root/.bashrc",
       "nvm install node",
-      "git clone https://github.com/Berkmann18/dg-discord-assistant.git"]
+      "git clone https://github.com/Berkmann18/dg-discord-assistant.git",
+      "cd dg-discord-assistant",
+      "npm i",
+      "npm run update",
+    "npm start"]
 
     connection {
       host        = self.ipv4_address
