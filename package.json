@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "update": "node deploy-commands",
+    "deploy": "node deploy-commands",
+    "deploy-global": "GLOBAL=1 node deploy-commands",
     "test": "echo \"Error: no test specified\" && exit 0",
     "lint": "eslint . && npm run lint:lockfile && npm run lint:md",
     "lint:fix": "eslint . --fix",
