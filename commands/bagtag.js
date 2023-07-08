@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, bold, inlineCode, italic, hyperlink } = require('discord.js');
 const { readFileSync: read, writeFileSync: write } = require('fs');
+const { use } = require('nclr');
 const { join } = require('path');
 
 const BAGTAG_URL = 'https://bagtag.manchesterdiscgolf.co.uk/update-tag?year=2023&tag=';
@@ -76,8 +77,10 @@ module.exports = {
     switch (interaction.options.getSubcommand()) {
       case 'add':
         //Add players and current bagtags (before the round starts)
-        playerData.push({ name, bagtag, score: score ?? 999 });
+        const data = { name, bagtag, score: score ?? 999 }
+        playerData.push(data);
         save();
+        info(`Added ${use('out', JSON.stringify(data, null, 2))}`);
         return interaction.reply(`Adding player ${name} with tag #${bagtag}`);
       case 'update':
         player = name
@@ -86,12 +89,14 @@ module.exports = {
         player.name = name;
         player.bagtag = bagtag;
         save();
+        info(`Updated ${use('out', JSON.stringify(player, null, 2))}`);
         return interaction.reply(`Updated player ${name} with tag #${bagtag}`);
       case 'score':
         //Enter player scores then show updated tag list
         player = playerData.find((p) => p.name === name);
         player.score = score;
         save();
+        info(`Updated ${use('out', name)} with score ${use('out', score)}`);
         return interaction.reply(`Updated player ${name} with score ${score}`);
       case 'view':
         // eslint-disable-next-line no-case-declarations
@@ -103,12 +108,17 @@ module.exports = {
           player.bagtag = tagList.shift();
         }
         save();
+        info('Viewing bag tag list');
+        console.table(playerData);
         return bagTagList(interaction);
       case 'clear':
         playerData = [];
         save();
+        info('Cleared the player list');
         return interaction.reply('List emptied');
       default:
+        warn(`"${interaction.options.getSubcommand()}" interaction failed`);
+        console.log(interaction);
         return interaction.reply(italic('Interaction failed'));
     }
   }
