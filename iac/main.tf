@@ -19,19 +19,21 @@ resource "digitalocean_droplet" "dg_discord_assistant" {
 
   user_data = "#cloud-config\npackage_update: true\npackage_upgrade: true"
 
+  provisioner "file" {
+    source = "setup.sh"
+    destination = "/tmp/setup.sh"
+  }
+
+  provisioner "file" {
+    source = "config.json"
+    destination = "/root/config.json"
+  }
+
   provisioner "remote-exec" {
     inline = [
-      "sudo apt update -y && sudo apt upgrade -y",
-      # "curl -sL https://deb.nodesource.com/setup_19.x -o nodesource_setup.sh"
-      # "sudo apt install nodejs npm -y",
-      "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash",
-      "source /root/.bashrc",
-      "nvm install node",
-      "git clone https://github.com/Berkmann18/dg-discord-assistant.git",
-      "cd dg-discord-assistant",
-      "npm i",
-      "npm run update",
-    "npm start"]
+      "chmod +x /tmp/setup.sh",
+      "/tmp/setup.sh"
+    ]
 
     connection {
       host        = self.ipv4_address

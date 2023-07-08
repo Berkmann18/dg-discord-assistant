@@ -103,4 +103,5 @@ info.txt
 iac/terraform.tfvars
 iac/terraform.tfstate*
 iac/.terraform
+iac/.terraform.lock*
 iac/tf-plan
