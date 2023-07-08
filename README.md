@@ -1,4 +1,4 @@
 # DG Assistant for Discord
 
-TODO:
-- Deploy it somewhere
+## Functions
+- CRUD ops for bag tag rounds.
