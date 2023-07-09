@@ -13,6 +13,7 @@ const PUTTING_FILE = join(__dirname, '../data/putting.json');
  * @type {{[puttingStyle: string]: {label: string, description: string, stats: [dist: number]: number}}}
  */
 let puttingData = JSON.parse(read(PUTTING_FILE, 'utf-8')) || {};
+const DISTANCES = [];
 /*
   {
     spush: {
@@ -37,6 +38,7 @@ const setupPuttingStyle = (name, label = name, description = '') => {
   //Only track stats for 5-20m putts
   for (let i = 5; i < 21; ++i) {
     puttingData[name].stats[i] = 0;
+    DISTANCES.push(i);
   }
 };
 
@@ -47,15 +49,39 @@ const styleOption = (opt) => {
 const save = () => write(PUTTING_FILE, JSON.stringify(puttingData, null, 2));
 const puttingTable = (style) => {
   const dists = Object.keys(puttingData[style].stats);
-  const distsHeader = dists.map((d) => `${d}m`).join(' | ');
-  const percs = Object.values(puttingData[style].stats).join(' | ');
+  const distsHeader = dists.map((d) => ` ${d}m `).join(' | ');
+  const percs = Object.values(puttingData[style].stats)
+    .map((p) => p.toFixed(2))
+    .join(' | ');
   //Discord doesn't support MD tables
+  const styleColBorder = '═'.repeat(style.length + 2);
   return `\`\`\`
-  ╔═══════${'╤═════'.repeat(dists.length)}═╗
+  ╔${styleColBorder}${'╤═════'.repeat(dists.length)}═╗
   ║ style | ${distsHeader} ║
-  ║═══════${'╪═════'.repeat(dists.length)} ║
+  ║${styleColBorder}${'╪═════'.repeat(dists.length)}═╣
   ║ ${style} | ${percs} ║
-  ╚═══════${'╧═════'.repeat(dists.length)}═╝
+  ╚${styleColBorder}${'╧═════'.repeat(dists.length)}═╝
+  \`\`\``;
+};
+const allPuttsTable = () => {
+  const distsHeader = DISTANCES.map((d) => ` ${d}m `).join(' | ');
+  const longestName = Math.max(...Object.keys(puttingData).map((s) => s.length)) + 2;
+  const headerBorder = '═'.repeat(longestName);
+  const styleBorder = '─'.repeat(longestName); //
+  const rows = '';
+  for (const style in puttingData) {
+    const percs = Object.values(puttingData[style].stats)
+      .map((p) => p.toFixed(2))
+      .join(' | ');
+    rows += `║ ${style} | ${percs} ║\n╟${styleBorder}${'┼─────'.repeat(DISTANCES.length)}─╢`;
+  }
+
+  return `\`\`\`
+  ╔${headerBorder}${'╤═════'.repeat(dists.length)}═╗
+  ║ style | ${distsHeader} ║
+  ║${headerBorder}${'╪═════'.repeat(dists.length)} ║
+  ${rows}
+  ╚${headerBorder}${'╧═════'.repeat(dists.length)}═╝
   \`\`\``;
 };
 
@@ -74,15 +100,15 @@ module.exports = {
         );
     })
     .addSubcommand((subcmd) => {
-      return (
-        subcmd
-          .setName('add-results')
-          .setDescription('Add Puttify results')
-          //? Can this be set as an arg rather than option? Nope, the interactions don't contain any arguments passed outside of the values to options
-          .addStringOption((opt) =>
-            opt.setName('results').setDescription('Puttify results in "5=1, 6=.8, 7=.47, ..."')
-          )
-      );
+      return subcmd
+        .setName('add-results')
+        .setDescription('Add Puttify results')
+        .addStringOption((opt) =>
+          opt.setName('results').setDescription('Puttify results in "5=1, 6=.8, 7=.47, ..."')
+        );
+    })
+    .addSubcommand((subcmd) => {
+      return subcmd.setName('compare').setDescription('Compare the putting styles');
     }),
   async execute(interaction) {
     const style = interaction.options.getString('style');
@@ -142,7 +168,7 @@ module.exports = {
       case 'compare':
         //TODO Compare in C1/C2/overall which are the best styles (ranked from best to worst)
         //TODO Suggest best putt based on ^
-        return;
+        return interaction.reply(allPuttsTable());
       default:
         warn(`"${interaction.options.getSubcommand()}" interaction failed`);
         console.log(interaction);
