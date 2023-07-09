@@ -43,6 +43,8 @@ const styleOption = (opt) => {
   return opt.setName('style').setDescription('putting style name').setMinLength(2);
 };
 
+const save = () => write(PUTTING_FILE, JSON.stringify(puttingData, null, 2));
+
 module.exports = {
   data: new SlashCommandBuilder().setName('putt').setDescription('Putt comparisons')
   .addSubcommand((subcmd) => {
@@ -55,7 +57,7 @@ module.exports = {
     return subcmd
       .setName('add-results')
       .setDescription('Add Puttify results')
-      //? Can this be set as an arg rather than option?
+      //? Can this be set as an arg rather than option? Nope, the interactions don't contain any arguments passed outside of the values to options
       .addStringOption(opt => opt.setName('results').setDescription('Puttify results in "5=1, 6=.8, 7=.47, ..."'));
   }),
   async execute(interaction) {
@@ -63,8 +65,10 @@ module.exports = {
     switch (interaction.options.getSubcommand()) {
       case 'add':
         //TODO Add putting style to puttingData (that should be persisted) and init it w/ the distances
-        console.log('interaction opts=', interaction.options);
+        // console.log('interaction opts=', interaction.options);
+        // console.log('interaction=', interaction);
         setupPuttingStyle(style);
+        save();
         return interaction.reply(`Added "${style}"`);
       case 'add-results':
         //TODO Add the Puttify result to specified style (possibly using https://discordjs.guide/message-components/select-menus.html#building-string-select-menus)

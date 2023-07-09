@@ -9,7 +9,6 @@ const PLAYERS_FILE = join(__dirname, '../data/players.json');
  * @type {Array<{name: string, score?: number, bagtag: number}>}
  */
 let playerData = JSON.parse(read(PLAYERS_FILE, 'utf-8')) || [];
-console.log('playerData=', playerData);
 
 const bagTagList = (interaction) => {
   playerData.sort((a, b) => a.bagtag - b.bagtag);

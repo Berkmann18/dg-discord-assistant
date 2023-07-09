@@ -25,8 +25,8 @@ resource "digitalocean_droplet" "dg_discord_assistant" {
   }
 
   provisioner "file" {
-    source = "config.json"
-    destination = "/root/config.json"
+    source = "configs/prod.json"
+    destination = "/root/configs/prod.json"
   }
 
   provisioner "remote-exec" {

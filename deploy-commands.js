@@ -1,8 +1,10 @@
 const { REST, Routes } = require('discord.js');
-const { clientId, guildId, token } = require('./config.json');
 const { readdirSync } = require('fs');
 const { join } = require('path');
 const { succ, warn, info, error } = require('nclr/symbols');
+
+const ENV = process.env.NODE_ENV ?? 'prod';
+const { clientId, guildId, token } = require(`./configs/${ENV}.json`);
 
 const commands = [];
 // Grab all the command files from the commands directory you created earlier
