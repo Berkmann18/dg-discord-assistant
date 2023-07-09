@@ -13,7 +13,7 @@ const PUTTING_FILE = join(__dirname, '../data/putting.json');
  * @type {{[puttingStyle: string]: {label: string, description: string, stats: [dist: number]: number}}}
  */
 let puttingData = JSON.parse(read(PUTTING_FILE, 'utf-8')) || {};
-const DISTANCES = [];
+const DISTANCES = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 /*
   {
     spush: {
@@ -38,7 +38,6 @@ const setupPuttingStyle = (name, label = name, description = '') => {
   //Only track stats for 5-20m putts
   for (let i = 5; i < 21; ++i) {
     puttingData[name].stats[i] = 0;
-    DISTANCES.push(i);
   }
 };
 
@@ -64,24 +63,28 @@ const puttingTable = (style) => {
   \`\`\``;
 };
 const allPuttsTable = () => {
-  const distsHeader = DISTANCES.map((d) => ` ${d}m `).join(' | ');
+  const distsHeader = DISTANCES.map((d) => d < 10 ? ` ${d}m ` : `${d}m `).join(' | ');
   const longestName = Math.max(...Object.keys(puttingData).map((s) => s.length)) + 2;
   const headerBorder = '═'.repeat(longestName);
   const styleBorder = '─'.repeat(longestName); //
-  const rows = '';
+  let rows = '';
+  const styleCount = Object.keys(puttingData).length;
+  let i = 0;
   for (const style in puttingData) {
+    ++i;
     const percs = Object.values(puttingData[style].stats)
       .map((p) => p.toFixed(2))
       .join(' | ');
-    rows += `║ ${style} | ${percs} ║\n╟${styleBorder}${'┼─────'.repeat(DISTANCES.length)}─╢`;
+    rows += `║ ${style + ' '.repeat(longestName - 2 - style.length)} | ${percs} ║`;
+    if (i < styleCount) rows += `\n`; /* ╟${styleBorder}${'┼─────'.repeat(DISTANCES.length)}╢ */
   }
 
   return `\`\`\`
-  ╔${headerBorder}${'╤═════'.repeat(dists.length)}═╗
-  ║ style | ${distsHeader} ║
-  ║${headerBorder}${'╪═════'.repeat(dists.length)} ║
-  ${rows}
-  ╚${headerBorder}${'╧═════'.repeat(dists.length)}═╝
+╔${headerBorder}${'╤══════'.repeat(DISTANCES.length)}╗
+║ ${'style' + ' '.repeat(longestName - 7)} | ${distsHeader} ║
+║${headerBorder}${'╪══════'.repeat(DISTANCES.length)}╣
+${rows}
+╚${headerBorder}${'╧══════'.repeat(DISTANCES.length)}╝
   \`\`\``;
 };
 
