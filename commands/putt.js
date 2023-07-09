@@ -1,6 +1,11 @@
-const { SlashCommandBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  StringSelectMenuOptionBuilder,
+  ActionRowBuilder,
+  StringSelectMenuBuilder
+} = require('discord.js');
 const { readFileSync: read, writeFileSync: write } = require('fs');
-const { use, info, warn } = require('nclr');
+const { warn, error, info } = require('nclr');
 const { join } = require('path');
 
 const PUTTING_FILE = join(__dirname, '../data/putting.json');
@@ -20,7 +25,7 @@ let puttingData = JSON.parse(read(PUTTING_FILE, 'utf-8')) || {};
     spush_s: {...}
     spush_p: {...}
     rotationalSpush: {...}
-  }
+  } 5=.95, 6=.6, 7=.49, 8=.6, 9=.36, 10=.36
 */
 
 const setupPuttingStyle = (name, label = name, description = '') => {
@@ -35,19 +40,24 @@ const setupPuttingStyle = (name, label = name, description = '') => {
   }
 };
 
-const distanceOption = (opt) => {
-  return opt
-    .setName('dist')
-    .setDescription('distance to the basket')
-    .setMinValue(3)
-    .setMaxValue(30);
-};
-
 const styleOption = (opt) => {
   return opt.setName('style').setDescription('putting style name').setMinLength(2);
 };
 
 const save = () => write(PUTTING_FILE, JSON.stringify(puttingData, null, 2));
+const puttingTable = (style) => {
+  const dists = Object.keys(puttingData[style].stats);
+  const distsHeader = dists.map((d) => `${d}m`).join(' | ');
+  const percs = Object.values(puttingData[style].stats).join(' | ');
+  //Discord doesn't support MD tables
+  return `\`\`\`
+  ╔═══════${'╤═════'.repeat(dists.length)}═╗
+  ║ style | ${distsHeader} ║
+  ║═══════${'╪═════'.repeat(dists.length)} ║
+  ║ ${style} | ${percs} ║
+  ╚═══════${'╧═════'.repeat(dists.length)}═╝
+  \`\`\``;
+};
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -99,17 +109,36 @@ module.exports = {
           .setCustomId('puttingStyle')
           .setPlaceholder('Select a style')
           .addOptions(...options);
-        const dist = interaction.options.getString('dist');
-        const stats = dist.split(/\s*,\s*/);
+        const res = interaction.options.getString('results');
+        const stats = res.split(/\s*,\s*/);
         console.log('stats=', stats);
 
         const row = new ActionRowBuilder().addComponents(select);
 
-        await interaction.reply({
-          content: 'For which style?',
-          components: [row],
-        });
-        return;
+        try {
+          const styleSelection = await interaction.reply({
+            content: 'For which style?',
+            components: [row]
+          });
+          const selection = await styleSelection.awaitMessageComponent();
+          const selectedStyle = selection.values ? selection.values[0] : null;
+
+          info('Style selected:', selectedStyle);
+          for (let stat of stats) {
+            const [dist, perc] = stat.split('=');
+
+            puttingData[selectedStyle].stats[+dist] = +perc;
+          }
+          save();
+          return interaction.followUp(puttingTable(selectedStyle));
+        } catch (err) {
+          error(err);
+          return await interaction.editReply({
+            content: 'An error happened, operation cancelled',
+            ephemeral: true,
+            components: []
+          });
+        }
       case 'compare':
         //TODO Compare in C1/C2/overall which are the best styles (ranked from best to worst)
         //TODO Suggest best putt based on ^

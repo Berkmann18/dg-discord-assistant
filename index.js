@@ -24,41 +24,18 @@ for (const file of commandFiles) {
   }
 }
 
-// When the client is ready, run this code (only once)
-// We use 'c' for the event parameter to keep it separate from the already defined 'client'
-client.once(Events.ClientReady, (c) => {
-  succ(`Ready! Logged in as ${c.user.tag}`);
-});
+const eventsPath = join(__dirname, 'events');
+const eventFiles = readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
-client.on(Events.InteractionCreate, async (interaction) => {
-  // console.log(interaction); //Logs the interaction with some JSON data about the user/guild/etc
-  if (!interaction.isChatInputCommand()) return;
-  const command = interaction.client.commands.get(interaction.commandName);
-
-  if (!command) {
-    const content = `No command matching ${interaction.commandName} was found.`;
-    error(content);
-    await interaction.reply({content, ephemeral: true});
-    return;
-  }
-
-  try {
-    await command.execute(interaction);
-  } catch (err) {
-    error(err);
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: 'There was an error while executing this command!',
-        ephemeral: true //This means that only the person the bot replies to see this message
-      });
-    } else {
-      await interaction.reply({
-        content: 'There was an error while executing this command!',
-        ephemeral: true
-      });
-    }
-  }
-});
+for (const file of eventFiles) {
+	const filePath = join(eventsPath, file);
+	const event = require(filePath);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args));
+	}
+}
 
 // Log in to Discord with your client's token
 client.login(token);
