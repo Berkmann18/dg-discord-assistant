@@ -1,9 +1,10 @@
 const { readdirSync } = require('fs');
 const { join } = require('path');
 const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
-const { token } = require('./config.json');
 const { succ, warn, error } = require('nclr/symbols');
 
+const ENV = process.env.NODE_ENV ?? 'prod';
+const { token } = require(`./configs/${ENV}.json`);
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -35,7 +36,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const command = interaction.client.commands.get(interaction.commandName);
 
   if (!command) {
-    error(`No command matching ${interaction.commandName} was found.`);
+    const content = `No command matching ${interaction.commandName} was found.`;
+    error(content);
+    await interaction.reply({content, ephemeral: true});
     return;
   }
 

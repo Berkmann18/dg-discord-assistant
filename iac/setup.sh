@@ -12,7 +12,7 @@ cd dg-discord-assistant
 npm i
 mv /root/config.json .
 npm i -g pm2
-npm run update
+npm run deploy
 pm2 start index.js --name "dg-discord-assistant"
 pm2 startup
 pm2 save

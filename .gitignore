@@ -98,7 +98,7 @@ build
 yarn.lock
 
 .env
-config.json
+configs
 info.txt
 iac/terraform.tfvars
 iac/terraform.tfstate*
