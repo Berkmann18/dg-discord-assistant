@@ -1,10 +1,10 @@
 const { SlashCommandBuilder, bold, inlineCode, italic, hyperlink } = require('discord.js');
 const { readFileSync: read, writeFileSync: write } = require('fs');
-const { use } = require('nclr');
+const { use, info, warn } = require('nclr');
 const { join } = require('path');
 
 const BAGTAG_URL = 'https://bagtag.manchesterdiscgolf.co.uk/update-tag?year=2023&tag=';
-const PLAYERS_FILE = join(__dirname, '../players.json');
+const PLAYERS_FILE = join(__dirname, '../data/players.json');
 /**
  * @type {Array<{name: string, score?: number, bagtag: number}>}
  */

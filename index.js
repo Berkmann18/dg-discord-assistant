@@ -46,7 +46,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({
         content: 'There was an error while executing this command!',
-        ephemeral: true
+        ephemeral: true //This means that only the person the bot replies to see this message
       });
     } else {
       await interaction.reply({
