@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+const { SlashCommandBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { readFileSync: read, writeFileSync: write } = require('fs');
 const { use, info, warn } = require('nclr');
 const { join } = require('path');
@@ -86,7 +86,6 @@ module.exports = {
         save();
         return interaction.reply(`Added "${style}"`);
       case 'add-results':
-        //TODO Add the Puttify result to specified style (possibly using https://discordjs.guide/message-components/select-menus.html#building-string-select-menus)
         const options = [];
         for (const style in puttingData) {
           options.push(
